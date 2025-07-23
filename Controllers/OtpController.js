@@ -49,9 +49,9 @@ module.exports ={
         return sendResponse(res, {}, message.OTP.OTP_EXPIRED, 401);
       }
   
-      // // Clear OTP after successful verification
-      // user.otp = null;
-      // user.otpExpiry = null;
+      // Clear OTP after successful verification
+      user.otp = null;
+      user.otpExpiry = null;
       await user.save();
   
       return sendResponse(res, {}, message.OTP.OTP_VERIFIED, 200);

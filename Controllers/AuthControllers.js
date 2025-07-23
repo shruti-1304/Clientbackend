@@ -5,6 +5,7 @@ const { generateToken } = require("../Helper/JwtHelper");
 const { sendResponse } = require("../Helper/ResponseHelper");
 const validate = require("../Helper/ValidationHelper")
 const { sendMail } = require("../Helper/MailHelper");
+const generateOtp = require("../Helper/Otpgenerate");
 module.exports = {
   registerUser: async (req, res) => {
     try {
@@ -108,7 +109,7 @@ module.exports = {
     const user = await User.findOne({ email });
     if (!user) return sendResponse(res, {}, messages.USER.NOT_FOUND, 422);
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit OTP
+    const otp = generateOtp() // 6 digit OTP
     const expiry = Date.now() + 20 * 60 * 1000; // 10 minutes from now
 
     user.otp = otp;
