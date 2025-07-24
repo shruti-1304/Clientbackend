@@ -4,6 +4,7 @@ const User = require("../Models/User")
 const {sendResponse} = require("../Helper/ResponseHelper")
 
 module.exports  ={
+  //getting the profile of the user by user id passing into the 
     getprofile  : async (req, res) => {
     try {
     const userId = req.user.id;
@@ -12,12 +13,13 @@ module.exports  ={
       return sendResponse(res, {}, messages.USER.NOT_FOUND, 422);
     }
 
-    return res.status(200).json({ success: true, data: user });
+    return sendResponse(res, user, messages.USER.USER_FOUND, 200);
   } catch (error) {
     console.error('Get Profile Error:', error);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 200);
   }
     },
+    //after getting user profile update profile option 
     updateprofile : async (req, res)=>{
         try {
       const userId = req.user.id;
@@ -44,7 +46,7 @@ module.exports  ={
  
       return sendResponse(res, updateUser, messages.USER.UPADATED_USER, 200);
     } catch (error) {
-      return sendResponse(res, {}, "server error", 500);
+      return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
     }
 }
 }

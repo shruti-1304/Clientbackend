@@ -21,7 +21,7 @@ module.exports ={
 
  
      
-      return sendResponse(res, newPost, "Post created successfully", 200);
+      return sendResponse(res, newPost, messages.POST.POST_CREATED, 200);
     } catch (error) {
       console.log("error", error);
       return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
@@ -29,19 +29,54 @@ module.exports ={
 },
 
 getPostList :async (req, res)=>{
-    try{
-        const posts = await Post.find()
-      .populate("user", "name").lean(); // populate userId field, but only return name
+//     try{
+//         const posts = await Post.find()
+//       .populate("user", "name").lean(); // populate userId field, but only return name
     
 
-    return  sendResponse(res, posts, "post list ", 200);
-    }
-    catch(error){
-         console.error(error);
-    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
+//     return  sendResponse(res, posts, messages.POST.POST_LIST, 200);
+//     }
+//     catch(error){
+//          console.error(error);
+//     return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
   
-    }
-}
- 
+//     }
+// }
 
+try {
+    const { userId, name, title } = req.query;
+
+    let filter = {};
+
+    if (userId) {
+      filter.user = userId;
+    }
+
+    if(search){
+        
+    }
+
+    if (title) {
+      filter.title = title; // case-insensitive {$regex: title, $options: "i" } 
+    }
+
+    // For user name, since it's in the referenced user collection, we handle it in populate + match
+    const posts = await Post.find(filter)
+      .populate({
+        path: "user",
+        select: "name",
+        match:  name ? { name: { $regex: name, $options: "i" } } : {}
+      
+      })
+
+    // Remove posts where populate returned null (i.e. name did not match)
+    const filteredPosts = posts.filter(post => post.user !== null);
+
+    return sendResponse(res, filteredPosts, messages.POST.POST_LIST, 200);
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
+  }
+ 
+}
 }

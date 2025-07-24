@@ -1,7 +1,8 @@
 const generateOtp =  require("../Helper/Otpgenerate")
 const {sendMail} = require("../Helper/MailHelper")
 const tempOtp = require("../Models/Otp")
-const {sendResponse} = require("../Helper/ResponseHelper")
+const {sendResponse} = require("../Helper/ResponseHelper");
+const messages = require("../Constant/messages");
 
 exports.requestLoginOtp = async (req, res) => {
   const { email } = req.body;
@@ -32,10 +33,10 @@ exports.requestLoginOtp = async (req, res) => {
   </html>`;
     await sendMail(email, "Your Login OTP", html);
  
-    return sendResponse(res, {}, "OTP sent to email", 200);
+    return sendResponse(res, {}, messages.OTP.OTP_SENT, 200);
   } catch (error) {
     console.log(error)
-    return sendResponse(res, {}, "Server error", 500);
+    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
   }
 };
  
