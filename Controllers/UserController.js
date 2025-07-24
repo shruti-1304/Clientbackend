@@ -124,7 +124,7 @@ module.exports = {
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
-      return sendResponse(res, {}, messages.PASSWORD.OLD_PASS, 401);
+      return sendResponse(res, {}, messages.PASSWORD.OLD_PASS, 422);
     }
 
     await user.save();

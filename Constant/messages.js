@@ -29,8 +29,8 @@ const messages = {
     FIELDS_REQUIRED :"All fields are required",
     PASSWORD_MATCH: "Passwords do not match",
     PASSWORD_CREATED :"Password reset successful",
-    OTP_VERIFIED:"Invalid or expired OTP",
-    OTP_EXPIRED :"OTP verified successfully",
+    OTP_VERIFIED:"OTP verified successfully",
+    OTP_EXPIRED : "Invalid or expired Otp",
     OTP_SENT: "OTP sent to your email"
   },
   PASSWORD:{

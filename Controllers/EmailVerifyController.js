@@ -1,3 +1,4 @@
+const messages = require("../Constant/messages");
 const { generateToken } = require("../Helper/JwtHelper");
 const { sendResponse } = require("../Helper/ResponseHelper");
 const validate = require("../Helper/ValidationHelper");
@@ -41,18 +42,18 @@ exports.verifyEmailOtp = async (req, res) => {
     if (user) {
       // generate token and login
       const token = generateToken({ id: user._id, email: user.email });
-      return sendResponse(res, { token, user }, "Login successful", 200);
+      return sendResponse(res, { token, user }, messages.AUTH.LOGIN_SUCCESS, 200);
     } else {
       return sendResponse(
         res,
         {},
-        "OTP verified, please complete registration",
+        messages.OTP.OTP_VERIFIED,
         200
       );
     }
   } catch (error) {
-    console.log("OTP Verification Error:", error);
-    return sendResponse(res, {}, "Server error", 500);
+    console.log(error)
+    // console.log("OTP Verification Error:", error);
+    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
   }
 };
- 
