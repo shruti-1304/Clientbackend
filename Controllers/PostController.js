@@ -44,39 +44,38 @@ getPostList :async (req, res)=>{
 // }
 
 try {
-    const { userId, name, title } = req.query;
-
-    let filter = {};
-
-    if (userId) {
-      filter.user = userId;
-    }
-
-    if(search){
-        
-    }
-
-    if (title) {
-      filter.title = title; // case-insensitive {$regex: title, $options: "i" } 
-    }
-
-    // For user name, since it's in the referenced user collection, we handle it in populate + match
-    const posts = await Post.find(filter)
-      .populate({
-        path: "user",
-        select: "name",
-        match:  name ? { name: { $regex: name, $options: "i" } } : {}
-      
-      })
-
-    // Remove posts where populate returned null (i.e. name did not match)
-    const filteredPosts = posts.filter(post => post.user !== null);
-
-    return sendResponse(res, filteredPosts, messages.POST.POST_LIST, 200);
-  } catch (error) {
-    console.error(error);
-    return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
-  }
+      const { search, userId } = req.query;
  
+      const filter = {};
+ 
+      // Apply userId filter if passed
+      if (userId) {
+        filter.user = userId;
+      }
+ 
+      // Build regex filter for title or description
+      if (search) {
+        const searchRegex = new RegExp(search, "i"); // case-insensitive
+        filter.$or = [
+          { title: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+        ];
+
+      }
+ 
+              console.log('filter',filter)
+
+      // Initial DB query with filters
+      const posts = await Post.find(filter).populate({
+        path: "user",
+        select: "name _id",
+      });
+ 
+      return sendResponse(res, posts, messages.POST.POST_FETCHED, 200);
+    } catch (error) {
+      console.log("error", error);
+      return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
+    }
+
 }
 }

@@ -40,7 +40,7 @@ const messages = {
   },  
   POST :{
     POST_CREATED : "Post created successfully",
-    POST_LIST :"Post list"
+    POST_FETCHED:"Post fetched successfully "
   }
 };
  
