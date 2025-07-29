@@ -1,150 +1,128 @@
 const messages = require("../Constant/messages");
+const { uploadFile } = require("../Helper/FileUploadHelper");
 const { sendResponse } = require("../Helper/ResponseHelper");
 const Post = require("../Models/Post");
 const mongoose = require("mongoose")
 
- 
 
-module.exports ={
-    createPost : async (req, res) => {
-  try {
+
+module.exports = {
+  createPost: async (req, res) => {
+    try {
+      //console.log("Req body",req.body)
+
       const userId = req.user.id;
+
+      console.log('userId', userId)
+
       console.log("userId from JWT:", userId);
- 
+
       const { title, description } = req.body;
+      const media = Array.isArray(req.files?.media) ? req.files?.media : [req.files?.media]
+
+
+
+      let uploadedPaths = [];
+
+      for (let i = 0; i < media.length; i++) {
+        const uploadedPath = await uploadFile(media[i]);
+        uploadedPaths.push(uploadedPath);
+      }
+
+
+      console.log('media files', media)
+      // return
       const newPost = new Post({
         user: userId,
         title,
         description,
+        media: uploadedPaths,
       });
- 
+
       await newPost.save();
 
- 
-     
+
+
       return sendResponse(res, newPost, messages.POST.POST_CREATED, 200);
     } catch (error) {
       console.log("error", error);
       return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
     }
-},
+  },
 
-getPostList :async (req, res)=>{
+  getPostList: async (req, res) => {
+
+    try {
+      const { userId, search, sort } = req.query;
+      const searchRegex = search ? new RegExp(search, "i") : null;
 
 
-// try {
-//       const { search, userId } = req.query;
- 
-//       const filter = {};
- 
-//       // Apply userId filter if passed
-//       if (userId) {
-//         filter.user = userId;
+      const matchFilter = {};
 
-//       }
- 
-//       // Build regex filter for title or description
-//       if (search) {
-//         const searchRegex = new RegExp(search, "i"); // case-insensitive
-//         filter.$or = [
-//           { title: { $regex: searchRegex } },
-//           { description: { $regex: searchRegex } },
-//         ];
 
-//       }
- 
-//               console.log('filter',filter)
-
-//       // Initial DB query with filters
-//       const posts = await Post.find(filter).populate({
-//         path: "user",
-//         select: "name _id",
-//       });
- 
-//       return sendResponse(res, posts, messages.POST.POST_FETCHED, 200);
-//     } catch (error) {
-//       console.log("error", error);
-//       return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
-//     }
-
-// }
-try {
-  const { userId, search } = req.query;
-  const searchRegex = search ? new RegExp(search, "i") : null;
-  console.log("seacrhRegex", searchRegex )
-
-  const matchFilter = {};
-  
-
-  if (userId) {
-    matchFilter.user = new mongoose.Types.ObjectId(userId);
-  }
-
-  // Step 2: Filter by title/description (we'll handle user.name later)
-  // if (search) {
-  //   matchConditions.push({
-  //     $or: [
-  //       { title: { $regex: searchRegex } },
-  //       { description: { $regex: searchRegex } },
-  //       {name : { $regex: searchRegex}}
-  //     ]
-  //   });
-  // }
-
- 
-  const posts = await Post.aggregate([
-    
-    { $match: matchFilter },
-
-    // Join with user collection
-    {
-      $lookup: {
-        from: "users",
-        localField: "user",
-        foreignField: "_id",
-        as: "user"
+      if (userId) {
+        matchFilter.user = new mongoose.Types.ObjectId(userId);
       }
-    },
 
-    // Convert user array to object
-    { $unwind: "$user" },
+      if (search) {
+        matchFilter.$or = [
+          { title: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+          { "user.name": { $regex: searchRegex } }
+        ];
+      }
 
-    // Search by user.name if search is given
-    ...(search
-      ? [
-          {
-            $match: {
-              $or: [
-                { title: { $regex: searchRegex } },
-                { description: { $regex: searchRegex } },
-                { "user.name": { $regex: searchRegex } }
-              ]
-            }
+      console.log("matchFilter", matchFilter)
+
+      const sortOrder = sort === "old" ? 1 : -1;
+
+      const posts = await Post.aggregate([
+
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user"
           }
-        ]
-      : []
-    ),
+        },
 
-    // Select only required fields
-    {
-      $project: {
-        title: 1,
-        description: 1,
-        createdat:1,
-        "user._id": 1,
-        "user.name": 1
-      }
+        { $unwind: "$user" },
+
+        { $match: matchFilter },
+
+
+        {
+          $project: {
+            title: 1,
+            description: 1,
+            media: 1,
+            createdAt: 1,
+            "user._id": 1,
+            "user.name": 1,
+
+          }
+        },
+        {
+          $sort: { createdAt: sortOrder }
+        }
+      ]);
+      console.log("posts", posts);
+
+      return sendResponse(res, { posts }, messages.POST.POST_FETCHED, 200);
+
+    } catch (error) {
+      console.log("error", error);
+      return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
     }
-  ]);
 
-  console.log("posts ", posts)
+  },
+  updatePost : async (req, res)=>{
+       try{
+       
+       }
+       catch(error){
 
-  
-  return sendResponse(res, posts, messages.POST.POST_FETCHED, 200);
-} catch (error) {
-  console.log("error", error);
-  return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
-}
-
-}
+       }
+  }
 }

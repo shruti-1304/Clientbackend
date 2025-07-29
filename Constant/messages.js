@@ -19,6 +19,7 @@ const messages = {
     TOKEN_MISSING: "Authentication token is missing.",
     EMAIL_SEND :"Email has been send",
     EMAIL_NOT_SEND :"Email has not been send",
+    TOKEN_INVALID:"Token invalid"
     
   },
   GENERAL: {

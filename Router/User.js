@@ -12,7 +12,7 @@ router.post("/update-password", authMiddleware, updatePassword)
 router.get("/profile", authMiddleware, getprofile);   
 router.put("/profile", authMiddleware, updateprofile); 
 router.post("/create-post", authMiddleware, createPost)
-router.get("/get-posts", getPostList)
+router.get("/get-posts",authMiddleware, getPostList)
 
 
 module.exports = router;

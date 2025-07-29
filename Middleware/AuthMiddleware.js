@@ -13,6 +13,7 @@ const authMiddleware = (req, res, next) => {
   const result = verifyToken(token);
  
   if (!result.valid) {
+
     return sendResponse(res, {}, messages.AUTH.TOKEN_INVALID, 422);
   }
  
