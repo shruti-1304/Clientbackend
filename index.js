@@ -38,4 +38,4 @@ app.use("/api/user", userRoutes)
 
 
 
-app.listen(Port, () => console.log("server started at", Port));
+app.listen(Port, () => console.log("server s/api/usertarted at", Port));

@@ -6,7 +6,11 @@ const postSchema = new mongoose.Schema({
   },
   title: String,
   description: String,
-  media: Array,
+  media: [{
+   media: { type: String }, 
+    
+  }
+  ],
  // status : Boolean,
    
 },

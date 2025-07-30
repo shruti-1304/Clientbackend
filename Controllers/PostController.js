@@ -26,7 +26,7 @@ module.exports = {
 
       for (let i = 0; i < media.length; i++) {
         const uploadedPath = await uploadFile(media[i]);
-        uploadedPaths.push(uploadedPath);
+        uploadedPaths.push({ media: uploadedPath });
       }
 
 
@@ -117,12 +117,57 @@ module.exports = {
     }
 
   },
-  updatePost : async (req, res)=>{
-       try{
-       
-       }
-       catch(error){
+  updatePost: async (req, res) => {
+    try {
 
-       }
+      const postId = req.params.postId;
+
+      console.log("postId", postId)
+
+
+      const { title, description, mediaToDelete } = req.body;
+
+      const post = await Post.findOne({ _id: postId });
+      if (!post) {
+        return sendResponse(res, {}, "Post not found", 404);
+      }
+
+      console.log("posts are    ....", post)
+      if (title) post.title = title;
+      if (description) post.description = description;
+
+      console.log("Media to delete:", mediaToDelete);
+
+      console.log("Original media:", post.media.map((m) => m._id.toString()));
+      
+
+      if (Array.isArray(mediaToDelete) && mediaToDelete.length > 0) {
+        post.media = post.media.filter(
+          (item) => !mediaToDelete.includes(item._id.toString())
+        );
+        // console.log("posts media", post.media)
+      }
+
+      const newMediaFiles = Array.isArray(req.files?.media)
+        ? req.files.media
+        : req.files?.media
+          ? [req.files.media]
+          : [];
+
+      if (newMediaFiles.length > 0) {
+        for (const file of newMediaFiles) {
+          const uploadedPath = await uploadFile(file);
+          post.media.push({ media: uploadedPath });
+        }
+      }
+      console.log("new media files", newMediaFiles)
+      await post.save();
+
+      return sendResponse(res, post, "Post updated successfully", 200);
+    } catch (error) {
+      console.log("error", error)
+      console.error("Update Post Error:", error);
+      return sendResponse(res, {}, "Server error", 500);
+    }
   }
 }
