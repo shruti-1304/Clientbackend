@@ -1,6 +1,7 @@
 const messages = require("../Constant/messages");
 const { uploadFile } = require("../Helper/FileUploadHelper");
 const { sendResponse } = require("../Helper/ResponseHelper");
+const Likes = require("../Models/LikesSchema");
 const Post = require("../Models/Post");
 const mongoose = require("mongoose")
 
@@ -75,7 +76,7 @@ module.exports = {
       console.log("matchFilter", matchFilter)
 
       const sortOrder = sort === "old" ? 1 : -1;
-
+       const countLike = await  Likes.countDocuments()
       const posts = await Post.aggregate([
 
         {

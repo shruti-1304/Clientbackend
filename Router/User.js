@@ -6,6 +6,7 @@ const { updatePassword } = require("../Controllers/UserController");
 const { getprofile, updateprofile } = require("../Controllers/SettingController");
 const { createPost, getPostList, updatePost } = require("../Controllers/PostController");
 const { createComment } = require("../Controllers/ComentController");
+const { toggleLike } = require("../Controllers/LikeController");
 
 router.post("/verifyotp", verifyOtp)
 router.post("/resetpassword", resetPassword)
@@ -16,6 +17,7 @@ router.post("/create-post", authMiddleware, createPost)
 router.get("/get-posts", authMiddleware, getPostList)
 router.put("/update-post/:postId", authMiddleware, updatePost)
 router.post("/create-comment", authMiddleware, createComment)
+router.post("/create-like", authMiddleware, toggleLike )
 
 
 
