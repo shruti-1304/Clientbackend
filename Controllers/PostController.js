@@ -74,41 +74,69 @@ module.exports = {
       console.log("matchFilter", matchFilter)
 
       const sortOrder = sort === "old" ? 1 : -1;
-       const countLike = await  Likes.countDocuments()
+      
       const posts = await Post.aggregate([
+  {
+    $lookup: {
+      from: "users",
+      localField: "user",
+      foreignField: "_id",
+      as: "user"
+    }
+  },
+  { $unwind: "$user" },
 
+  //Lookup like by this user for this post
+  {
+    $lookup: {
+      from: "likes",
+      let: { postId: "$_id" },
+      pipeline: [
         {
-          $lookup: {
-            from: "users",
-            localField: "user",
-            foreignField: "_id",
-            as: "user"
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$postId", "$$postId"] },
+                { $eq: ["$userId", new mongoose.Types.ObjectId(req.userId)] }
+              ]
+            }
           }
-        },
-
-        { $unwind: "$user" },
-
-        { $match: matchFilter },
-
-
-        {
-          $project: {
-            title: 1,
-            description: 1,
-            media: 1,
-            createdAt: 1,
-            likesCount :1,
-            commentCount:1,
-            //isLike:1,
-            "user._id": 1,
-            "user.name": 1,
-
-          }
-        },
-        {
-          $sort: { createdAt: sortOrder }
         }
-      ]);
+      ],
+      as: "userLike"
+    }
+  },
+
+  // ✅ Convert to true/false
+  {
+    $addFields: {
+      isLike: { $gt: [{ $size: "$userLike" }, 0] }
+    }
+  },
+
+  {
+    $match: matchFilter
+  },
+
+  {
+    $project: {
+      title: 1,
+      description: 1,
+      media: 1,
+      createdAt: 1,
+      likesCount: 1,
+      commentCount: 1,
+      isLike: 1, //include virtual field
+      "user._id": 1,
+      "user.name": 1,
+    }
+  },
+
+  {
+    $sort: { createdAt: sortOrder }
+  }
+]);
+
       console.log("posts", posts);
 
       return sendResponse(res, { posts }, messages.POST.POST_FETCHED, 200);

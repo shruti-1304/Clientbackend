@@ -1,14 +1,16 @@
+const mongoose = require('mongoose');
 const messages = require("../Constant/messages")
 const { sendResponse } = require("../Helper/ResponseHelper")
 const Comment = require("../Models/CommentSchema")
 const Post = require("../Models/Post")
 
+
 module.exports = {
   createComment: async (req, res) => {
     try {
       const { postId, comment } = req.body
-      const userId = req.userId
-      //console.log("userid", userId)
+      const userId = req.user.id
+      console.log("userid", userId)
 
       if (!postId || !comment) {
         return sendResponse(res, {}, "Post ID and comment are required", 401);
@@ -63,23 +65,26 @@ module.exports = {
   deleteComment: async (req, res) => {
     try {
       const commentId = req.params.commentId;
-      const userId = req.userId;
-      console.log("user id", userId)
-      console.log("comment id ", commentId)
+      console.log("commnet id", commentId)
+      const userId = req.user.id;
+
+      console.log("Type of userId:", userId);
+
       if (!commentId) {
-        return sendResponse(res, {}, "Comment ID is required", 401);
+        return sendResponse(res, {}, "Comment ID is required", 422);
       }
 
-      const comment = await Comment.findById(commentId);
+      const comment = await Comment.findOne({_id:commentId, userId});
+
       
+      console.log("comment", comment)
+
+
+
       if (!comment) {
-        return sendResponse(res, {}, "Comment not found", 404);
+        return sendResponse(res, {}, "Comment not found", 422);
       }
 
-      // check if the user deleting it is the owner
-      if (!comment.userId || comment.userId.toString() !== userId) {
-        return sendResponse(res, {}, "Unauthorized to delete this comment", 401);
-      }
 
 
       // Delete the comment
@@ -88,14 +93,13 @@ module.exports = {
       // Decrement comment count on the post
       const post = await Post.findById(comment.postId);
       if (post) {
-        post.commentCount -= 1;
-        if (post.commentCount < 0) post.commentCount = 0;
+        post.commentCount = Math.max(0, post.commentCount - 1);
         await post.save();
       }
 
       return sendResponse(res, {}, "Comment deleted successfully", 200);
+
     } catch (error) {
-      console.log("error", error)
       console.log("Delete comment error:", error);
       return sendResponse(res, {}, messages.GENERAL.SERVER_ERROR, 500);
     }
