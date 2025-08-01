@@ -12,9 +12,17 @@ const postSchema = new mongoose.Schema({
   }
   ],
  // status : Boolean,
-   
+ likesCount: {
+    type: Number,
+    default: 0,
+  },
+  commentCount:{
+    type :Number,
+    default:0,
+  } ,
+ // isLike:Boolean
 },
- 
+
  {
     timestamps: true,
   }

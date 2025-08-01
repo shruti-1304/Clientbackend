@@ -10,11 +10,9 @@ const mongoose = require("mongoose")
 module.exports = {
   createPost: async (req, res) => {
     try {
-      //console.log("Req body",req.body)
+      console.log("Req body",req.body)
 
       const userId = req.user.id;
-
-      console.log('userId', userId)
 
       console.log("userId from JWT:", userId);
 
@@ -99,6 +97,9 @@ module.exports = {
             description: 1,
             media: 1,
             createdAt: 1,
+            likesCount :1,
+            commentCount:1,
+            //isLike:1,
             "user._id": 1,
             "user.name": 1,
 
