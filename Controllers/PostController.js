@@ -10,7 +10,7 @@ const mongoose = require("mongoose")
 module.exports = {
   createPost: async (req, res) => {
     try {
-      console.log("Req body",req.body)
+      console.log("Req body", req.body)
 
       const userId = req.user.id;
 
@@ -74,68 +74,69 @@ module.exports = {
       console.log("matchFilter", matchFilter)
 
       const sortOrder = sort === "old" ? 1 : -1;
-      
+      const currentUserId = new mongoose.Types.ObjectId(req.user?.id || req.userId);
+
       const posts = await Post.aggregate([
-  {
-    $lookup: {
-      from: "users",
-      localField: "user",
-      foreignField: "_id",
-      as: "user"
-    }
-  },
-  { $unwind: "$user" },
-
-  //Lookup like by this user for this post
-  {
-    $lookup: {
-      from: "likes",
-      let: { postId: "$_id" },
-      pipeline: [
         {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ["$postId", "$$postId"] },
-                { $eq: ["$userId", new mongoose.Types.ObjectId(req.userId)] }
-              ]
-            }
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user"
           }
+        },
+        { $unwind: "$user" },
+
+        //Lookup like by this user for this post
+        {
+          $lookup: {
+            from: "likes",
+            let: { postId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$postId", "$$postId"] },
+                      { $eq: ["$userId", currentUserId] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: "userLike"
+          }
+        },
+
+        // Convert to true/false
+        {
+          $addFields: {
+            isLike: { $gt: [{ $size: "$userLike" }, 0] }
+          }
+        },
+
+        {
+          $match: matchFilter
+        },
+
+        {
+          $project: {
+            title: 1,
+            description: 1,
+            media: 1,
+            createdAt: 1,
+            likesCount: 1,
+            commentCount: 1,
+            isLike: 1, //include virtual field
+            "user._id": 1,
+            "user.name": 1,
+          }
+        },
+
+        {
+          $sort: { createdAt: sortOrder }
         }
-      ],
-      as: "userLike"
-    }
-  },
-
-  // ✅ Convert to true/false
-  {
-    $addFields: {
-      isLike: { $gt: [{ $size: "$userLike" }, 0] }
-    }
-  },
-
-  {
-    $match: matchFilter
-  },
-
-  {
-    $project: {
-      title: 1,
-      description: 1,
-      media: 1,
-      createdAt: 1,
-      likesCount: 1,
-      commentCount: 1,
-      isLike: 1, //include virtual field
-      "user._id": 1,
-      "user.name": 1,
-    }
-  },
-
-  {
-    $sort: { createdAt: sortOrder }
-  }
-]);
+      ]);
 
       console.log("posts", posts);
 
@@ -169,7 +170,7 @@ module.exports = {
       console.log("Media to delete:", mediaToDelete);
 
       console.log("Original media:", post.media.map((m) => m._id.toString()));
-      
+
 
       if (Array.isArray(mediaToDelete) && mediaToDelete.length > 0) {
         post.media = post.media.filter(

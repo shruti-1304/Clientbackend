@@ -7,6 +7,7 @@ const { getprofile, updateprofile } = require("../Controllers/SettingController"
 const { createPost, getPostList, updatePost } = require("../Controllers/PostController");
 const { createComment, deleteComment, getComment } = require("../Controllers/CommentController");
 const { toggleLike } = require("../Controllers/LikeController");
+const { addCategory } = require("../Controllers/CategoryController");
 
 router.post("/verifyotp", verifyOtp)
 router.post("/resetpassword", resetPassword)
@@ -20,6 +21,7 @@ router.post("/create-comment", authMiddleware, createComment)
 router.post("/create-like", authMiddleware, toggleLike )
 router.delete("/delete-comment/:commentId" , authMiddleware, deleteComment)
 router.get("/get-comment", authMiddleware, getComment)
+router.post("/add-category", authMiddleware, addCategory)
 
 
 
