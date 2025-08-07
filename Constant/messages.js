@@ -42,6 +42,21 @@ const messages = {
   POST :{
     POST_CREATED : "Post created successfully",
     POST_FETCHED:"Post fetched successfully "
+  },
+
+  ARTICLE:{
+    ARTICLE_CREATED :"Article created ",
+    ARTICLE_GET :"Article fetched",
+    NOT_FOUND :"Article not found",
+    ARTICLE_UPDATE:"Article updated successfully",
+    ARTICLE_DELETE:"Article deleted successfully "
+  },
+  BADGE:{
+  FETCH_SUCCESS: "Badge criteria fetched successfully",
+  UPDATE_SUCCESS: "Badge criteria updated successfully",
+  CATEGORY_NOT_FOUND: "Badge category not found",
+  INVALID_CATEGORY: "Invalid badge category",
+  INTERNAL_SERVER_ERROR: "Something went wrong. Please try again later.",
   }
 };
  

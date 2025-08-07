@@ -40,19 +40,40 @@ module.exports = {
 
             return sendResponse(res, article, "Article created", 200);
         } catch (error) {
-            console.error("Add Article Error:", error);
+            
             return sendResponse(res, {}, "Server error", 500);
         }
     },
     //get the list of the articles present 
     getArticles: async (req, res) => {
         try {
-            //sorted by latest one 
-            const articles = await Article.find().sort({ createdAt: -1 });
-            return sendResponse(res, articles, "Articles fetched", 200);
+            // Get page and limit from query parameters (default: page=1, limit=10)
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+
+            // Calculate how many documents to skip
+            const skip = (page - 1) * limit;
+
+            // Fetch total count for pagination info
+            const totalCount = await Article.countDocuments();
+
+            // Fetch paginated articles, sorted by latest
+            const articles = await Article.find()
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            // Send paginated response
+            return sendResponse(res, {
+                articles,
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                totalItems: totalCount
+            }, "Articles fetched", 200);
         } catch (error) {
             return sendResponse(res, {}, "Server error", 500);
         }
+
     },
     //updating the article 
     updateArticle: async (req, res) => {
@@ -114,4 +135,27 @@ module.exports = {
             return sendResponse(res, {}, "Server error", 500);
         }
     },
+    toggleArticleStatus: async (req, res) => {
+        try {
+            const articleId = req.params.id;
+
+
+
+            const article = await Article.findById(articleId);
+            if (!article) {
+                return sendResponse(res, {}, "Article not found", 404);
+            }
+
+            // Toggle status: true => false, false => true
+            article.status = !article.status;
+
+            await article.save();
+
+            return sendResponse(res, article, `Article ${article.status ? "activated" : "deactivated"} successfully`, 200);
+        } catch (error) {
+            console.error("Toggle Status Error:", error);
+            return sendResponse(res, {}, "Server error", 500);
+        }
+    }
+
 };

@@ -10,7 +10,8 @@ const { toggleLike } = require("../Controllers/LikeController");
 const { addCategory, getCategory, deleteCategory, updateCategory } = require("../Controllers/CategoryController");
 const { addSubCategory, getSubCategoriesByCategory, deleteSubCategory, updateSubCategory } = require("../Controllers/SubCategoryController");
 const { addHobby, getHobbiesBySubCategory, deleteHobby, updateHobby } = require("../Controllers/HobbyController");
-const { addArticle, getArticles, updateArticle, deleteArticle } = require("../Controllers/ArticleController");
+const { addArticle, getArticles, updateArticle, deleteArticle, toggleArticleStatus } = require("../Controllers/ArticleController");
+const { getBadgeCriteriaByCategory, updateBadgeCriteria } = require("../Controllers/BadgeController");
 
 router.post("/verifyotp", verifyOtp)
 router.post("/resetpassword", resetPassword)
@@ -40,4 +41,7 @@ router.post("/post-article", authMiddleware,addArticle)
 router.get("/get-article", authMiddleware, getArticles)
 router.put("/update-article/:id", authMiddleware, updateArticle);
 router.delete("/delete-article/:id", authMiddleware, deleteArticle)
+router.put("/toggle-article/:id", authMiddleware, toggleArticleStatus)
+router.get("/badge-criteria/:category", authMiddleware, getBadgeCriteriaByCategory)
+router.put("/badge-criteria/:id", authMiddleware, updateBadgeCriteria)
 module.exports = router;

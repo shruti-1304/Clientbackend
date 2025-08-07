@@ -156,7 +156,8 @@ module.exports = {
       console.log("postId", postId)
 
 
-      const { title, description, mediaToDelete } = req.body;
+      let { title, description, mediaToDelete } = req.body;
+      mediaToDelete = [].concat(mediaToDelete || []);
 
       const post = await Post.findOne({ _id: postId });
       if (!post) {
